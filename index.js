@@ -1,12 +1,39 @@
 const express = require("express");
-const fetch = require("node-fetch"); // 🔥 WAJIB
+const fetch = require("node-fetch");
 
 const app = express();
 
+// ==========================
+// LIST KOIN AJAIB (EDITABLE)
+// ==========================
+const AJAIB_COINS = [
+  "BTCUSDT",
+  "ETHUSDT",
+  "BNBUSDT",
+  "SOLUSDT",
+  "XRPUSDT",
+  "ADAUSDT",
+  "DOGEUSDT",
+  "MATICUSDT",
+  "AVAXUSDT",
+  "DOTUSDT",
+  "SHIBUSDT",
+  "TRXUSDT",
+  "LINKUSDT",
+  "ATOMUSDT",
+  "LTCUSDT"
+];
+
+// ==========================
+// ROOT
+// ==========================
 app.get("/", (req, res) => {
   res.send("Pump Detector Running 🚀");
 });
 
+// ==========================
+// SCANNER
+// ==========================
 app.get("/scanner", async (req, res) => {
 
   try {
@@ -18,43 +45,49 @@ app.get("/scanner", async (req, res) => {
 
     data.forEach(c => {
 
-      let change = parseFloat(c.priceChangePercent);
-      let volume = parseFloat(c.quoteVolume);
+      // 🔥 FILTER HANYA KOIN AJAIB
+      if (AJAIB_COINS.includes(c.symbol)) {
 
-      // filter lebih ringan dulu biar pasti keluar
-     if (c.symbol.endsWith("USDT")) {
+        let change = parseFloat(c.priceChangePercent);
+        let volume = parseFloat(c.quoteVolume);
 
-  if (change > 2 && volume > 2000000) {
-    result.push({
-      symbol: c.symbol,
-      change: change.toFixed(2),
-      volume: Math.floor(volume),
-      signal: "🚀 STRONG PUMP"
-    });
-  }
+        // 🔥 LOGIC PUMP
+        if (change > 2 && volume > 2000000) {
+          result.push({
+            symbol: c.symbol,
+            change: change.toFixed(2),
+            volume: Math.floor(volume),
+            signal: "🚀 STRONG PUMP"
+          });
+        }
 
-  else if (change > 1 && volume > 1000000) {
-    result.push({
-      symbol: c.symbol,
-      change: change.toFixed(2),
-      volume: Math.floor(volume),
-      signal: "🔥 EARLY PUMP"
-    });
-  }
+        else if (change > 1 && volume > 1000000) {
+          result.push({
+            symbol: c.symbol,
+            change: change.toFixed(2),
+            volume: Math.floor(volume),
+            signal: "🔥 EARLY PUMP"
+          });
+        }
 
-}
       }
 
     });
 
+    // 🔥 URUTKAN DARI TERKUAT
+    result.sort((a, b) => b.change - a.change);
+
     res.json(result);
 
   } catch (err) {
-    console.log(err); // 🔥 biar kelihatan di log
+    console.log(err);
     res.json({ error: "Gagal ambil data" });
   }
 
 });
 
+// ==========================
+// SERVER
+// ==========================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("Server running on " + PORT));
