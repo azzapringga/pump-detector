@@ -38,39 +38,40 @@ app.get("/scanner", async (req, res) => {
 
   try {
 
-    const response = await fetch("https://api.binance.com/api/v3/ticker/24hr");
-    const data = await response.json();
-
     let result = [];
 
-    data.forEach(c => {
+    for (let symbol of AJAIB_COINS) {
 
-      if (AJAIB_COINS.includes(c.symbol)) {
+      // 🔥 ambil data 10 menit (1m x 10)
+      const response = await fetch(
+        `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1m&limit=10`
+      );
 
-        let change = parseFloat(c.priceChangePercent);
-        let volume = parseFloat(c.quoteVolume);
+      const data = await response.json();
 
-        if (change > 2 && volume > 2000000) {
+      if (data.length > 0) {
+
+        let firstPrice = parseFloat(data[0][1]); // open candle pertama
+        let lastPrice = parseFloat(data[data.length - 1][4]); // close terakhir
+
+        let change = ((lastPrice - firstPrice) / firstPrice) * 100;
+
+        // 🔥 ambil volume terakhir
+        let volume = parseFloat(data[data.length - 1][5]);
+
+        // 🔥 LOGIC EARLY PUMP
+        if (change > 0.5) {
           result.push({
-            symbol: c.symbol,
+            symbol: symbol,
             change: change.toFixed(2),
             volume: Math.floor(volume),
-            signal: "🚀 STRONG PUMP"
-          });
-        }
-
-        else if (change > 1 && volume > 1000000) {
-          result.push({
-            symbol: c.symbol,
-            change: change.toFixed(2),
-            volume: Math.floor(volume),
-            signal: "🔥 EARLY PUMP"
+            signal: "🚀 10M PUMP"
           });
         }
 
       }
 
-    });
+    }
 
     result.sort((a, b) => b.change - a.change);
 
@@ -78,7 +79,7 @@ app.get("/scanner", async (req, res) => {
 
   } catch (err) {
     console.log(err);
-    res.json({ error: "Gagal ambil data" });
+    res.json({ error: "error ambil data" });
   }
 
 });
