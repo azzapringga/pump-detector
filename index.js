@@ -1,12 +1,6 @@
 const express = require("express");
-const app = express();
-const fetch = require("node-fetch");
+const fetch = require("node-fetch"); // 🔥 WAJIB
 
-app.get("/", (req, res) => {
-  res.send("Pump Detector Running 🚀");
-});
-
-const express = require("express");
 const app = express();
 
 app.get("/", (req, res) => {
@@ -27,8 +21,8 @@ app.get("/scanner", async (req, res) => {
       let change = parseFloat(c.priceChangePercent);
       let volume = parseFloat(c.quoteVolume);
 
-      // 🔥 FILTER EARLY PUMP (bisa kita tweak nanti)
-      if (change > 1 && volume > 1000000) {
+      // filter lebih ringan dulu biar pasti keluar
+      if (change > 0.5) {
         result.push({
           symbol: c.symbol,
           change: change.toFixed(2),
@@ -42,13 +36,10 @@ app.get("/scanner", async (req, res) => {
     res.json(result);
 
   } catch (err) {
+    console.log(err); // 🔥 biar kelihatan di log
     res.json({ error: "Gagal ambil data" });
   }
 
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Server running on " + PORT));
 });
 
 const PORT = process.env.PORT || 3000;
