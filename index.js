@@ -22,13 +22,27 @@ app.get("/scanner", async (req, res) => {
       let volume = parseFloat(c.quoteVolume);
 
       // filter lebih ringan dulu biar pasti keluar
-      if (change > 0.5) {
-        result.push({
-          symbol: c.symbol,
-          change: change.toFixed(2),
-          volume: Math.floor(volume),
-          signal: change > 3 ? "🚀 STRONG PUMP" : "🔥 EARLY PUMP"
-        });
+     if (c.symbol.endsWith("USDT")) {
+
+  if (change > 2 && volume > 2000000) {
+    result.push({
+      symbol: c.symbol,
+      change: change.toFixed(2),
+      volume: Math.floor(volume),
+      signal: "🚀 STRONG PUMP"
+    });
+  }
+
+  else if (change > 1 && volume > 1000000) {
+    result.push({
+      symbol: c.symbol,
+      change: change.toFixed(2),
+      volume: Math.floor(volume),
+      signal: "🔥 EARLY PUMP"
+    });
+  }
+
+}
       }
 
     });
