@@ -45,37 +45,26 @@ app.get("/scanner", async (req, res) => {
 
     data.forEach(c => {
 
-      // 🔥 FILTER HANYA KOIN AJAIB
+      // 🔥 DEBUG: cek apakah masuk list
       if (AJAIB_COINS.includes(c.symbol)) {
+
+        console.log("MASUK:", c.symbol); // 👈 ini penting
 
         let change = parseFloat(c.priceChangePercent);
         let volume = parseFloat(c.quoteVolume);
 
-        // 🔥 LOGIC PUMP
-        if (change > 2 && volume > 2000000) {
+        if (change > 1) {
           result.push({
             symbol: c.symbol,
             change: change.toFixed(2),
             volume: Math.floor(volume),
-            signal: "🚀 STRONG PUMP"
-          });
-        }
-
-        else if (change > 1 && volume > 1000000) {
-          result.push({
-            symbol: c.symbol,
-            change: change.toFixed(2),
-            volume: Math.floor(volume),
-            signal: "🔥 EARLY PUMP"
+            signal: "🔥 PUMP"
           });
         }
 
       }
 
     });
-
-    // 🔥 URUTKAN DARI TERKUAT
-    result.sort((a, b) => b.change - a.change);
 
     res.json(result);
 
