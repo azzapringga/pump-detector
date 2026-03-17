@@ -60,7 +60,7 @@ app.get("/scanner", async (req, res) => {
         let volume = parseFloat(data[data.length - 1][5]);
 
         // 🔥 LOGIC EARLY PUMP
-        if (change > 0.5) {
+         if (change > 0.3 && volume > 1000) {
           result.push({
             symbol: symbol,
             change: change.toFixed(2),
