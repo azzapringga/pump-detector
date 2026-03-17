@@ -36,42 +36,12 @@ app.get("/", (req, res) => {
 // ==========================
 app.get("/scanner", async (req, res) => {
 
-  try {
+  const response = await fetch("https://api.binance.com/api/v3/ticker/24hr");
+  const data = await response.json();
 
-    const response = await fetch("https://api.binance.com/api/v3/ticker/24hr");
-    const data = await response.json();
+  const filtered = data.filter(c => AJAIB_COINS.includes(c.symbol));
 
-    let result = [];
-
-    data.forEach(c => {
-
-      // 🔥 DEBUG: cek apakah masuk list
-      if (AJAIB_COINS.includes(c.symbol)) {
-
-        console.log("MASUK:", c.symbol); // 👈 ini penting
-
-        let change = parseFloat(c.priceChangePercent);
-        let volume = parseFloat(c.quoteVolume);
-
-        if (change > 1) {
-          result.push({
-            symbol: c.symbol,
-            change: change.toFixed(2),
-            volume: Math.floor(volume),
-            signal: "🔥 PUMP"
-          });
-        }
-
-      }
-
-    });
-
-    res.json(result);
-
-  } catch (err) {
-    console.log(err);
-    res.json({ error: "Gagal ambil data" });
-  }
+  res.json(filtered);
 
 });
 
