@@ -36,12 +36,50 @@ app.get("/", (req, res) => {
 // ==========================
 app.get("/scanner", async (req, res) => {
 
-  const response = await fetch("https://api.binance.com/api/v3/ticker/24hr");
-  const data = await response.json();
+  try {
 
-  const filtered = data.filter(c => AJAIB_COINS.includes(c.symbol));
+    const response = await fetch("https://api.binance.com/api/v3/ticker/24hr");
+    const data = await response.json();
 
-  res.json(filtered);
+    let result = [];
+
+    data.forEach(c => {
+
+      if (AJAIB_COINS.includes(c.symbol)) {
+
+        let change = parseFloat(c.priceChangePercent);
+        let volume = parseFloat(c.quoteVolume);
+
+        if (change > 2 && volume > 2000000) {
+          result.push({
+            symbol: c.symbol,
+            change: change.toFixed(2),
+            volume: Math.floor(volume),
+            signal: "🚀 STRONG PUMP"
+          });
+        }
+
+        else if (change > 1 && volume > 1000000) {
+          result.push({
+            symbol: c.symbol,
+            change: change.toFixed(2),
+            volume: Math.floor(volume),
+            signal: "🔥 EARLY PUMP"
+          });
+        }
+
+      }
+
+    });
+
+    result.sort((a, b) => b.change - a.change);
+
+    res.json(result);
+
+  } catch (err) {
+    console.log(err);
+    res.json({ error: "Gagal ambil data" });
+  }
 
 });
 
