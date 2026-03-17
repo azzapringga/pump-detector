@@ -6,7 +6,14 @@ app.get("/", (req, res) => {
 });
 
 app.get("/scanner", (req, res) => {
-  res.json([{ test: "OK" }]);
+  res.json([
+    {
+      symbol: "BTCUSDT",
+      change: "1.2",
+      volume: 123456789,
+      signal: "🚀 TEST PUMP"
+    }
+  ]);
 });
 
 const PORT = process.env.PORT || 3000;
