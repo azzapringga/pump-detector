@@ -2,10 +2,10 @@ const axios = require("axios");
 
 const URL = "https://api.ajaib.co.id/coin/internal/v1/public/market-data";
 const INTERVAL = 30000; // 30 detik
-const HISTORY_LENGTH = 20; // 20 x 30 detik = 10 menit
+const HISTORY_LENGTH = 10; // simpan 10 record = 10 x 30 detik = 5 menit (cukup ringan)
 const MAX_COINS = 50; // hanya top 50 koin
 
-// Struktur data history: {symbol: [{price, volume, timestamp}, ...]}
+// Struktur history: {symbol: [{price, volume, timestamp}, ...]}
 let history = {};
 
 // Ambil data market terbaru
@@ -13,7 +13,7 @@ async function fetchData() {
   try {
     const res = await axios.get(URL);
     if (!res.data || !res.data.data) return [];
-    return res.data.data.slice(0, MAX_COINS); // batasi koin top 50
+    return res.data.data.slice(0, MAX_COINS); // batasi top 50 koin
   } catch (err) {
     console.error("❌ Error ambil data:", err.message);
     return [];
@@ -32,14 +32,14 @@ function updateHistory(data) {
     if (!history[symbol]) history[symbol] = [];
     history[symbol].push({ price, volume, timestamp: now });
 
-    // jaga history hanya HISTORY_LENGTH terakhir
+    // batasi HISTORY_LENGTH terakhir
     if (history[symbol].length > HISTORY_LENGTH) {
       history[symbol].shift();
     }
   });
 }
 
-// Hitung pump real
+// Hitung pump
 function detectPump() {
   let results = [];
 
@@ -47,7 +47,7 @@ function detectPump() {
     const records = history[symbol];
     if (records.length < HISTORY_LENGTH) continue; // belum cukup data
 
-    const old = records[0]; // data 10 menit lalu
+    const old = records[0]; // data pertama
     const latest = records[records.length - 1];
 
     const changePercent = ((latest.price - old.price) / old.price) * 100;
@@ -73,8 +73,7 @@ function detectPump() {
 // Main loop
 async function main() {
   try {
-    console.clear();
-    console.log("🚀 SCANNING PUMP COIN REAL-TIME...\n");
+    console.log("🚀 SCANNING PUMP COIN REAL-TIME...");
 
     const data = await fetchData();
     if (data.length === 0) {
@@ -90,16 +89,17 @@ async function main() {
       return;
     }
 
-    console.log("🔥 KOIN TERDETEKSI PUMP 10 MENIT:\n");
+    console.log("🔥 KOIN TERDETEKSI PUMP:\n");
     pumped.slice(0, 10).forEach((coin, index) => {
       console.log(
         `${index + 1}. ${coin.symbol} | Harga: ${coin.price} | Change: ${coin.change}% | Volume: ${coin.volume}`
       );
     });
+    console.log("\n-----------------------------\n");
   } catch (err) {
     console.error("❌ Loop error:", err.message);
   }
 }
 
-// Run setiap INTERVAL
+// Jalankan interval
 setInterval(main, INTERVAL);
